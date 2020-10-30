@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import time
 import datetime
 from datetime import datetime as dt
@@ -33,6 +34,8 @@ def get_channels():
     for r in df1:
         print(r)
         channels_from_db.append(r)
+    cursor.close()
+    con.close()
     return channels_from_db
 
 
@@ -48,7 +51,7 @@ L = instaloader.Instaloader()
 hashtags = {
     'отправдынеубежишь',
     'бессмертныйполк',
-    'шалкет'
+    'шалкет',
         'уменяестьголос',
     'новостикз',
     'новостиалматы',
@@ -77,7 +80,66 @@ hashtags = {
     'qazaqkoktemi',
     'oyanqazaq',
     'oyanqazaqstan',
-    'atpa'
+    'atpa',
+    'новостиказахстан',
+    'малоимущие',
+    'многодетные',
+    'переименование',
+    'девальвация',
+    'казахстан',
+    'ясделалсвойвыбор',
+    'ActivistsNotExtremists',
+    'АктивистыНеЭкстремисты',
+    'IHaveAChoiсe',
+    'НУРСУЛТАН_НЕ_МОЙ_ГОРОД',
+    'нурсултан_не_мой_город',
+    'ТОКАЕВ_НЕ_МОЙ_ПРЕЗИДЕНТ',
+    'токаев_не_мой_президен',
+    'ДАРИГА_НЕ_МОЙ_СПИКЕР_СЕНАТА_ПАРЛАМЕНТА',
+    'дарига_не_мой_спикер_сената_парламента',
+    'У_НАС_ЕСТЬ_ВЫБОР',
+    'ОТ_ПРАВДЫ_НЕ_УБЕЖИШЬ',
+    'СВОБОДУ_ПОЛИТЗАКЛЮЧЕННЫМ',
+    'teamqazaqstan'
+    'ОянҚазақ',
+    'Қазақстан',
+    'ОЙЛАНҚАЗАҚ',
+    'халықЖеңеді',
+    'КөзіңдіАш',
+    'Ihaveachoice',
+    'forafairelectio',
+    'toqayevteam',
+    'менояндым',
+    'уменяестьвыбор',
+     'менояндым',
+    'qazaqkoktemi',
+    'уменяестьвыбор',
+    'отправдынеубежишь',
+    'бессмертныйполк',
+    'шалкет',
+    'уменяестьголос',
+    'новостикз',
+    'новостиалматы',
+    'двк',
+    'назарбаев',
+    'аблязов',
+    'seruen',
+    'adilsailayushin',
+        'диктатура',
+    'экстримисты',
+    'экстримизм',
+    'террористы',
+    'несправедливость',
+    'революция',
+    'Ihaveachoice',
+    'toqayevteam',
+    'менояндым',
+    'блокироватьsalem',
+    'блочитьsalem',
+    'общенародный_освободительный_протест_бостандық',
+    'нет_нелегитимным_выборам',
+    'в_новую_страну_без_политических_репрессий',
+    'новостиастаны',
 }
 
 connection_text = "DATABASE=PRODDB;HOSTNAME=192.168.252.11;PORT=50000;PROTOCOL=TCPIP;UID=db2inst1;PWD=Qjuehnghj1;"
@@ -92,7 +154,7 @@ try:
         posts = L.get_hashtag_posts(hashtag=hashtag)
 
         SINCE = datetime.datetime.now()
-        UNTIL = SINCE - datetime.timedelta(days=7)
+        UNTIL = SINCE - datetime.timedelta(days=1)
         print(SINCE, '  ', UNTIL)
 
         for post in takewhile(lambda p: p.date > UNTIL, dropwhile(lambda p: p.date > SINCE, posts)):
@@ -107,7 +169,7 @@ try:
             views = post.video_view_count or 0
             reposts = 'null'
             caption = 'null'
-            text = str(post.caption)
+            text = str(post.caption).encode(encoding='UTF-8', errors='strict')
             url_attachment = post.url
             shortcode = post.shortcode
 
@@ -148,6 +210,7 @@ try:
                 c_object_id = str(post.mediaid)
                 c_published_date = comment.created_at_utc
                 comment_text = comment.text
+                comment_text = comment_text.encode(encoding='UTF-8', errors='strict')
                 comment_likes = 0
                 author_id = str(comment.owner.userid)
                 author_name = comment.owner.username
@@ -188,6 +251,7 @@ try:
                     reply_object_id = str(post.mediaid)
                     reply_published_date = g.created_at_utc
                     reply_comment_text = g.text
+                    reply_comment_text = reply_comment_text.encode(encoding='UTF-8', errors='strict')
                     reply_comment_likes = 0
                     reply_author_id = str(g.owner.userid)
                     reply_author_name = g.owner.username

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import time
 import datetime
 from datetime import datetime as dt
@@ -33,6 +34,8 @@ def get_channels():
     for r in df1:
         print(r)
         channels_from_db.append(r)
+    cursor.close()
+    con.close()
     return channels_from_db
 
 
@@ -61,7 +64,14 @@ connection_text = "DATABASE=PRODDB;HOSTNAME=192.168.252.11;PORT=50000;PROTOCOL=T
 con = db.connect(connection_text, "", "")
 cursor = con.cursor()
 try:
-    bot_message = "InstaPositiveKeywords Running" +  "  " +  str(datetime.datetime.now())
+    inserted_post = 0
+    inserted_comments = 0
+    inserted_replies = 0
+    updated_post = 0
+    updated_comments = 0
+    updated_replies = 0
+    bot_message = "InstaPositiveKeywords Running"  +  "\n\tInserted post: " + inserted_post  +  "\n\tUpdated post: " + updated_post +  "\n\tInserted comment: " + inserted_comments  +  "\n\tUpdated comment: " + updated_comments  +  "\n\tInserted relies: " + inserted_replies  +  "\n\tUpdated replies: " + updated_replies 
+
     telegram_bot_sendtext(bot_message)
     for hashtag in hashtags:
 
@@ -69,7 +79,7 @@ try:
         posts = L.get_hashtag_posts(hashtag=hashtag)
 
         SINCE = datetime.datetime.now()
-        UNTIL = SINCE - datetime.timedelta(days=7)
+        UNTIL = SINCE - datetime.timedelta(days=2)
         print(SINCE, '  ', UNTIL)
 
         for post in takewhile(lambda p: p.date > UNTIL, dropwhile(lambda p: p.date > SINCE, posts)):
@@ -84,7 +94,7 @@ try:
             views = post.video_view_count or 0
             reposts = 'null'
             caption = 'null'
-            text = str(post.caption)
+            text = str(post.caption).encode(encoding='UTF-8', errors='strict')
             url_attachment = post.url
             shortcode = post.shortcode
 
@@ -106,6 +116,7 @@ try:
                 cursor.execute(sql_history_test, (object_id, inserted_date, published_date, channel_id, likes, comments, caption, text, url_attachment, url_channel, source_id))
 
                 cursor.execute(sql_update)
+                updated_post += 1
             else:
 
                 print('Insert ', object_id, 'object.', datetime.datetime.now())
@@ -115,6 +126,7 @@ try:
                     cursor.execute(sql_1_test, (object_id, published_date, channel_id, likes, comments, views, caption, text, url_attachment, url_channel, source_id, location))
                 except:
                     print('Missed ', object_id)
+                inserted_post += 1
             con.commit()
             time.sleep(3)
             comments_t = post.get_comments()
@@ -124,6 +136,7 @@ try:
                 c_object_id = str(post.mediaid)
                 c_published_date = comment.created_at_utc
                 comment_text = comment.text
+                comment_text = comment_text.encode(encoding='UTF-8', errors='strict')
                 comment_likes = 0
                 author_id = str(comment.owner.userid)
                 author_name = comment.owner.username
@@ -141,7 +154,7 @@ try:
                     print('Update {comment_id} comment.'.format(comment_id=comment_id), datetime.datetime.now())
                     sql_update = "update tl_media_comments_inst set comment_likes = {likes} where comment_id = \'{comment_id}\'".format(likes=comment_likes, comment_id=comment_id)
                     cursor.execute(sql_update)
-
+                    updated_comments += 1
                 else:
 
                     print('Insert ', comment_id, 'comment.', datetime.datetime.now())
@@ -150,6 +163,7 @@ try:
                         cursor.execute(sql_1_test, (comment_id, c_published_date, c_object_id, comment_likes, comment_text, author_id, author_name, person_url, source_id))
                     except:
                         print('Missed ', object_id)
+                    inserted_comments += 1
                 con.commit()
 
                 time.sleep(3)
@@ -162,6 +176,7 @@ try:
                     reply_object_id = str(post.mediaid)
                     reply_published_date = g.created_at_utc
                     reply_comment_text = g.text
+                    reply_comment_text = reply_comment_text.encode(encoding='UTF-8', errors='strict')
                     reply_comment_likes = 0
                     reply_author_id = str(g.owner.userid)
                     reply_author_name = g.owner.username
@@ -178,6 +193,7 @@ try:
                         print('Update reply {comment_id} comment.'.format(comment_id=reply_comment_id),datetime.datetime.now())
                         sql_update = "update tl_media_comments_inst set comment_likes = {likes}, author_url = \'{author_url}\' where comment_id = \'{comment_id}\'".format(likes=reply_comment_likes, author_url=reply_person_url, comment_id=reply_comment_id)
                         cursor.execute(sql_update)
+                        updated_replies += 1
 
                     else:
 
@@ -187,11 +203,15 @@ try:
                             cursor.execute(sql_1_test, (reply_comment_id, reply_published_date, reply_object_id, reply_comment_likes, reply_comment_text, reply_author_id, reply_author_name, reply_person_url, reply_source_id, reply_parent_id))
                         except:
                             print('Missed ', object_id)
+                        inserted_replies += 1
                     con.commit()
 
 except:
-    bot_message = "InstaPositiveKeywords ERROR" +  "  " +  str(datetime.datetime.now())
+    bot_message = "InstaPositiveKeywords ERROR" +  "\n\tInserted post: " + inserted_post  +  "\n\tUpdated post: " + updated_post +  "\n\tInserted comment: " + inserted_comments  +  "\n\tUpdated comment: " + updated_comments  +  "\n\tInserted relies: " + inserted_replies  +  "\n\tUpdated replies: " + updated_replies 
     telegram_bot_sendtext(bot_message)
 
 cursor.close()
 con.close()
+
+bot_message = "InstaPositiveKeywords DONE"  +  "\n\tInserted post: " + inserted_post  +  "\n\tUpdated post: " + updated_post +  "\n\tInserted comment: " + inserted_comments  +  "\n\tUpdated comment: " + updated_comments  +  "\n\tInserted relies: " + inserted_replies  +  "\n\tUpdated replies: " + updated_replies 
+telegram_bot_sendtext(bot_message)

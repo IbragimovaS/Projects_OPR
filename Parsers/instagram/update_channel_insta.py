@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import requests
 import json
 import time
@@ -25,6 +26,14 @@ headers = {
 keys = ['id', 'owner', 'display_url', 'edge_liked_by', 'edge_media_to_comment', 'shortcode', 'edge_media_to_caption',
         'accessibility_caption', 'is_video', 'text']
 
+def telegram_bot_sendtext(bot_message):
+    bot_token = '873733574:AAFmyXY_cvkErr9YpYNw7Qf3Y87d1Sjpgg4'
+    bot_chatID = '91344390'
+    send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + bot_chatID + '&parse_mode=Markdown&text=' + bot_message
+
+    response = requests.get(send_text)
+
+    return response.json()
 
 def jprint(data_dict):
     print(json.dumps(data_dict, indent=4))
@@ -431,14 +440,14 @@ blogs_negative = {
 
 }
 
-while True:
 
-   for blog in blogs_positive:
-       data_blog = get_id_for_blog(url='https://www.instagram.com/' + blog + '/?__a=1', headers=headers)
-       get_blog_data(data_blog, 2)
-   time.sleep(1800)
+for blog in blogs_positive:
+   data_blog = get_id_for_blog(url='https://www.instagram.com/' + blog + '/?__a=1', headers=headers)
+   get_blog_data(data_blog, 2)
+time.sleep(1800)
 
-   for blog1 in blogs_negative:
-       data_blog = get_id_for_blog(url='https://www.instagram.com/' + blog1 + '/?__a=1', headers=headers)
-       get_blog_data(data_blog, 1002)
-   time.sleep(1800)
+for blog1 in blogs_negative:
+    data_blog = get_id_for_blog(url='https://www.instagram.com/' + blog1 + '/?__a=1', headers=headers)
+    get_blog_data(data_blog, 1002)
+time.sleep(1800)
+
