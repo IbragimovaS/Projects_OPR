@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import time
 import datetime
 from datetime import datetime as dt
@@ -22,7 +23,7 @@ def get_channels():
     connection_text = "DATABASE=PRODDB;HOSTNAME=192.168.252.11;PORT=50000;PROTOCOL=TCPIP;UID=db2inst1;PWD=Qjuehnghj1;"
     con = db.connect(connection_text, "", "")
     cursor = con.cursor()
-    sql = 'select channel_id from tl_media_channels where source_id = 2 order by id limit(30) offset(150)'
+    sql = 'select channel_id from tl_media_channels where source_id = 2 order by id limit(35) offset(150)'
     df = pandas.read_sql(sql, con)
 
     df['channel_id'] = df['CHANNEL_ID'].str.replace("'", "")
@@ -33,6 +34,8 @@ def get_channels():
     for r in df1:
         print(r)
         channels_from_db.append(r)
+    cursor.close()
+    con.close()
     return channels_from_db
 
 
@@ -61,7 +64,7 @@ try:
         posts = profile.get_posts()
 
         SINCE = datetime.datetime.now()
-        UNTIL = SINCE - datetime.timedelta(days=7)
+        UNTIL = SINCE - datetime.timedelta(days=2)
         print(SINCE, '  ', UNTIL)
         for post in takewhile(lambda p: p.date > UNTIL, dropwhile(lambda p: p.date > SINCE, posts)):
             print(post.date)
@@ -75,7 +78,7 @@ try:
             views = post.video_view_count or 0
             reposts = 'null'
             caption = 'null'
-            text = str(post.caption)
+            text = str(post.caption).encode(encoding='UTF-8', errors='strict')
             url_attachment = post.url
             shortcode = post.shortcode
 
@@ -115,6 +118,7 @@ try:
                 c_object_id = str(post.mediaid)
                 c_published_date = comment.created_at_utc
                 comment_text = comment.text
+                comment_text = comment_text.encode(encoding='UTF-8', errors='strict')
                 comment_likes = 0
                 author_id = str(comment.owner.userid)
                 author_name = comment.owner.username
@@ -153,6 +157,7 @@ try:
                     reply_object_id = str(post.mediaid)
                     reply_published_date = g.created_at_utc
                     reply_comment_text = g.text
+                    reply_comment_text = reply_comment_text.encode(encoding='UTF-8', errors='strict')
                     reply_comment_likes = 0
                     reply_author_id = str(g.owner.userid)
                     reply_author_name = g.owner.username
@@ -179,6 +184,8 @@ try:
                         except:
                             print('Missed ', object_id)
                     con.commit()
+except instaloader.ProfileNotExistsException:
+    print('Profile not EXIST')
 
 except:
     bot_message = "InstaPositive50 ERROR" +  "  " +  str(datetime.datetime.now())
