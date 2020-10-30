@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-import pandas
 import requests
 import time
 import datetime
 import csv
 import ibm_db_dbi as db
 import re
+import pandas
 
 def telegram_bot_sendtext(bot_message):
     bot_token = '873733574:AAFmyXY_cvkErr9YpYNw7Qf3Y87d1Sjpgg4'
@@ -16,14 +16,15 @@ def telegram_bot_sendtext(bot_message):
 
     return response.json()
 
+
 def get_channels():
     connection_text = "DATABASE=PRODDB;HOSTNAME=192.168.252.11;PORT=50000;PROTOCOL=TCPIP;UID=db2inst1;PWD=Qjuehnghj1;"
     con = db.connect(connection_text, "", "")
     cursor = con.cursor()
-    sql = 'select channel_id from tl_media_channels where source_id = 1 order by id limit(18)'
+    sql = 'select channel_id from tl_media_channels where source_id = 1 order by id limit(6) offset(127)'
     df = pandas.read_sql(sql, con)
 
-    df['channel_id_wa'] = df['CHANNEL_ID'].str.replace("'", "")
+    df['channel_id_wa'] = df['CHANNEL_ID'].str.replace("'","")
     df1 = df['channel_id_wa'].values.tolist()
     print(df1)
     channels_from_db = []
@@ -38,7 +39,7 @@ def getjson(url, data=None):
     print(response.url, '\n')
     return response.json()
 
-#1546300800  1551398400   1554854400	1556668800  1557273600  1556712000  1557792000 1558742400
+#1546300800  1551398400    1554854400	1556668800 1557273600   1556712000   1557792000 1558742400
 
 def get_date(date):
     new_date = date - datetime.timedelta(days=2)
@@ -215,7 +216,6 @@ def get_user(user_id):
         city = ""
         bdate = ""
         url = ""
-
     try:
         try:
             dtf = datetime.datetime.strptime(bdate, '%d.%m.%Y')
@@ -226,9 +226,9 @@ def get_user(user_id):
                 dtf = datetime.datetime.strptime(bdate, '')
     except:
         dtf = datetime.datetime.strptime('', '')
+
     bdate = dtf.strftime('%Y-%m-%d')
 
-    #print("____", bdate)
     return FIO, city, bdate, url
 
 
@@ -313,7 +313,7 @@ def make_comments(post_id, all_comments, all_profiles):
         except:
             text = 'WEX_ERROR'
 
-        url = ''
+        """url = ''
         scr_name = ''
         try:
             for prof in all_profiles:
@@ -326,7 +326,7 @@ def make_comments(post_id, all_comments, all_profiles):
                         url = 'deleted'
         except:
             scr_name = ''
-            url = ''
+            url = ''"""
 
         scr_name, city, bdate, url = get_user(person_id)
 
@@ -407,8 +407,6 @@ def insert_into_db_test(posts, owner_id, group_name):
             reposts = post.get('reposts', 'null')
             caption = ""
             text = "\'" + post.get('text', 'null').replace("'", "''").replace("\n+", " ") + "\'"
-            if text == '':
-                text = 'WEX_ERROR'
             text = text.encode(encoding='UTF-8', errors='strict')
             url_attachment = "\'" + post.get('attachments', 'null') + "\'"
             url_channel = "https://vk.com/" + group_name
@@ -444,8 +442,6 @@ def insert_into_db_test(posts, owner_id, group_name):
             reposts = post.get('reposts', 'null')
             caption = ""
             text = "\'" + post.get('text', 'null').replace("'", "''").replace("\n+", " ") + "\'"
-            if text == '':
-                text = 'WEX_ERROR'
             text = text.encode(encoding='UTF-8', errors='strict')
             url_attachment = "\'" + post.get('attachments', 'null') + "\'"
             url_channel = "https://vk.com/" + group_name
@@ -486,8 +482,7 @@ def insert_into_db_test_com(comments, owner_id):
             #print(author_name," ",author_url)
 
             sql_update = "update tl_media_comments_vk set comment_likes = {likes}, author_name =\'{author_name}\', author_url =\'{author_url}\', city =\'{city}\', bdate =\'{bdate}\', channel_id=\'\'{channel_id}\'\' where comment_id=\'{comment_id}\' and object_id={object_id}".format(
-                likes=likes, author_name=author_name, author_url=author_url, city=city, bdate=bdate,
-                comment_id=comment_id, channel_id=channel_id, object_id=object_id)
+                likes=likes, author_name=author_name, author_url=author_url, city=city, bdate=bdate,comment_id=comment_id, channel_id=channel_id, object_id=object_id)
             print(sql_update)
             cursor.execute(sql_update)
         else:
@@ -501,8 +496,6 @@ def insert_into_db_test_com(comments, owner_id):
             comment_likes = comment.get('likes', 'null')
             comment_text = "\'" + comment.get('text', 'null').replace("'", "\"").replace("\n", " ").replace(",",
                                                                                                             "") + "\'"
-            if comment_text == '':
-                comment_text = 'WEX_ERROR'
             comment_text = comment_text.encode(encoding='UTF-8', errors='strict')
             author_id = comment.get('person_id', 'null')
             author_name = comment.get('scr_name', 'null').replace("'", "''")
@@ -512,7 +505,7 @@ def insert_into_db_test_com(comments, owner_id):
 
             source_id = 1
             sql_1_test = "insert into tl_media_comments_vk (comment_id, published_date, object_id, comment_likes, comment_text,author_id,author_name, author_url, source_id, city, bdate, channel_id) values (?,?,?,?,?,?,?,?,?,?,?,?)"
-
+            print(sql_1_test, comment_id, object_id, channel_id)
             cursor.execute(sql_1_test, [comment_id, date, object_id, comment_likes, comment_text, author_id, author_name, author_url, source_id,city, bdate, channel_id])
 
         con.commit()
@@ -520,30 +513,25 @@ def insert_into_db_test_com(comments, owner_id):
     cursor.close()
     con.close()
 
-access_token = '8b736f75dec22f7e5dfbae322adff0b30a5a0e3c31a7c0ce74378fb94fd949dd30872a7722a1fd29f3d7a'
-
-
+access_token = 'd2d581fc6393044c9a77799594da4a809a8971d89e65b8c13a6fb8d5779565bd662aede7897f03a05e803'
 
 while True:
-    bot_message = "VkYerbol RUNNING" + "  " + str(datetime.datetime.now())
+    bot_message = "VkAli RUNNING" + "  " + str(datetime.datetime.now())
     telegram_bot_sendtext(bot_message)
-    channels_from_db = get_channels()
+    channels_from_db = { '-119976621'}
     print(channels_from_db)
-    try:
-        for owner_id in channels_from_db:
-            all_posts, count_posts, parsed_posts_count, group_name = get_new_posts(access_token, owner_id)
-            print('All posts count', count_posts, 'and parsed posts', parsed_posts_count)
-            pposts = make_posts(all_posts)
+    for owner_id in channels_from_db:
+        all_posts, count_posts, parsed_posts_count, group_name = get_new_posts(access_token, owner_id)
+        print('All posts count', count_posts, 'and parsed posts', parsed_posts_count)
+        pposts = make_posts(all_posts)
 
-    #        print(pposts)
-            insert_into_db_test(pposts, owner_id, group_name)
-            all_comments = []
-            for post_id in pposts:
-                comments, comments_count, all_profiles = get_new_comments(access_token, owner_id, post_id['id'])
-                if post_id['comments_count'] > 0:
-                    all_comments += make_comments(post_id['id'], comments, all_profiles)
-            insert_into_db_test_com(all_comments, owner_id)
-    #        print(all_comments)
-    except:
-        bot_message = "VkYerbol ERROR" + "  " + str(datetime.datetime.now())
-        telegram_bot_sendtext(bot_message)
+#        print(pposts)
+        insert_into_db_test(pposts, owner_id, group_name)
+        all_comments = []
+        for post_id in pposts:
+            comments, comments_count, all_profiles = get_new_comments(access_token, owner_id, post_id['id'])
+            if post_id['comments_count'] > 0:
+                all_comments += make_comments(post_id['id'], comments, all_profiles)
+        insert_into_db_test_com(all_comments, owner_id)
+#        print(all_comments)
+
