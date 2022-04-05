@@ -1,8 +1,8 @@
 from crontab import CronTab
 
 
-my_cron = CronTab(user='sholpan')
-job = my_cron.new(command='python3 /home/sholpan/PycharmProjects/crontab/instagram.py \'1626737751\' 01.12.19 01.09.19')
+my_cron = CronTab(user='user')
+job = my_cron.new(command='python3 /home/user/PycharmProjects/crontab/script.py \'1626737751\' 01.12.19 01.09.19')
 job.minute.every(5)
 
 
