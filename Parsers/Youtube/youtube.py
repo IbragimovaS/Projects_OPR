@@ -11,26 +11,14 @@ sys.path.append(os.path.abspath('../'))
 import youtube_api
 from youtube_api import youtube_api_utils as utils
 
-connection_text = "DATABASE=PRODDB;HOSTNAME=192.168.252.11;PORT=50000;PROTOCOL=TCPIP;UID=db2inst1;PWD=Qjuehnghj1;"
+connection_text = "DATABASE=PRODDB;HOSTNAME=hostname;PORT=port;PROTOCOL=TCPIP;UID=user_id;PWD=password;"
 con = db.connect(connection_text, "", "")
 cursor = con.cursor()
 
-key = 'AIzaSyBHLmkYpZJWgI7yKgy6QJtObCmflRTQO0U'
+key = '################key##############'
 yt = youtube_api.YoutubeDataApi(key)
 
 channel_ids = {
-    'UCIlLaUQtcaabbw9-uQysRjw',  # 13
-    'UCNsmiVP_84KPtswCMNgz75A',  # 14
-    'UC6wZggQydceHuEwIT5GUgBA',  # 15
-    'UCG7gueoHzq06Lxn998Ib6GQ',  # 16
-    'UCiJ6RBthQvEPI4UsSNtM8jw',  # 17
-    'UCcsOAJgwReu4SFGKqdlDufg',  # 18
-    'UCUlcTEcMt1hVBZCzWemS-kw',  # 19
-    'UCIf2roNEhnjiT5etYrW5EOw',  # 20
-    'UCiknsLQvfySJZ0DSDo1W5jA',  # 21
-    'UCeCf8i63K_zrjdFM5IiW98Q',  # 22
-    'UCKg0oy4-scG8jYBwFbMaq5w',  # 23
-    'UCfkdQX-rX_fgXuqmp_oR6fQ',  # 24
 
 }
 for channel_id in channel_ids:
