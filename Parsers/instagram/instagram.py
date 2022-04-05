@@ -10,8 +10,8 @@ import sys
 
 
 def telegram_bot_sendtext(bot_message):
-    bot_token = '766790954:AAFgBHzh6FPOpHakusiqNSPQ7z5d_kFJCAg'
-    bot_chatID = '91344390'
+    bot_token = '###########TOKEN##########'
+    bot_chatID = '###########CHAT ID#########'
     send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + bot_chatID + '&parse_mode=Markdown&text=' + bot_message
 
     response = requests.get(send_text)
@@ -20,33 +20,24 @@ def telegram_bot_sendtext(bot_message):
 
 
 L = instaloader.Instaloader()
-# print("enter channel ID: ")
-# channel_id = {input()}
-channel_id = {sys.argv[1]}#{'1626737751'}
-# print("enter from_date: ")
-# from_date = input()
-# print("enter  to date: ")
-# to_date = input()
-conn = psycopg2.connect(dbname='postgres', user='postgres', password='Mukanov13', host='localhost')
+channel_id = {sys.argv[1]}
+
+conn = psycopg2.connect(dbname='dbname', user='user', password='password', host='host')
 cur = conn.cursor()
 users_cron = CronTab()
 # try:
-bot_message = "InstaNegative0 Running" + "  " + str(datetime.datetime.now())
+bot_message = "Instagram parser Running" + "  " + str(datetime.datetime.now())
 telegram_bot_sendtext(bot_message)
 for id in channel_id:
     sql_data_update = """ UPDATE tl_media_data_inst SET likes = %s, comments = %s, views = %s, reposts = %s, caption = %s, text = %s  WHERE object_id = %s"""
     print('Downloading posts from ', id)
     profile = instaloader.Profile.from_id(L.context, id)
-    print(profile)
     posts = profile.get_posts()
-    # SINCE = datetime.datetime.strptime(from_date, '%d.%m.%y')
-    # UNTIL = datetime.datetime.strptime(to_date, '%d.%m.%y')
-    SINCE = datetime.datetime.strptime(sys.argv[2], '%d.%m.%y') #datetime.datetime.now()
-    UNTIL = datetime.datetime.strptime(sys.argv[3], '%d.%m.%y') #SINCE - datetime.timedelta(days=22)
-    print(SINCE, '  ', UNTIL)
+    SINCE = datetime.datetime.strptime(sys.argv[2], '%d.%m.%y') 
+    UNTIL = datetime.datetime.strptime(sys.argv[3], '%d.%m.%y')
+    
     for post in takewhile(lambda p: p.date > UNTIL, dropwhile(lambda p: p.date > SINCE, posts)):
         print(post.date)
-        # print('instagram.com/p/'+post.shortcode, ' ', post.owner_id, ' ', post.owner_username)
         object_id = str(post.mediaid)
         published_date = post.date_local
         channel_id = str(post.owner_id)
@@ -56,7 +47,6 @@ for id in channel_id:
         reposts = 0
         caption = 'null'
         text = post.caption
-        # text = text.encode(encoding='UTF-8', errors='strict')
         url_attachment = post.url
         shortcode = post.shortcode
 
@@ -88,7 +78,6 @@ for id in channel_id:
             c_object_id = str(post.mediaid)
             c_published_date = comment.created_at_utc
             comment_text = comment.text
-            # comment_text = comment_text.encode(encoding='UTF-8', errors='strict')
             comment_likes = 0
             author_id = str(comment.owner.userid)
             author_name = comment.owner.username
@@ -99,7 +88,6 @@ for id in channel_id:
             cur.execute(
                 'select id from tl_media_comments_inst where comment_id=\'{comment_id}\''.format(comment_id=comment_id))
             one_row = cur.fetchone()
-            # print(comments_id_db)
             if one_row is not None:
                 print('Updated - ', object_id, ' comment')
                 cur.execute(sql_comment_update, (comment_likes, comment_text, comment_id))
@@ -122,7 +110,6 @@ for id in channel_id:
                 reply_object_id = str(post.mediaid)
                 reply_published_date = g.created_at_utc
                 reply_comment_text = g.text
-                # reply_comment_text = reply_comment_text.encode(encoding='UTF-8', errors='strict')
                 reply_comment_likes = 0
                 reply_author_id = str(g.owner.userid)
                 reply_author_name = g.owner.username
@@ -133,7 +120,6 @@ for id in channel_id:
                 cur.execute('select id from tl_media_comments_inst where comment_id=\'{comment_id}\''.format(
                     comment_id=reply_comment_id))
                 one_row = cur.fetchone()
-                # print(comments_id_db)
                 if one_row is not None:
                     print('Updated - ', object_id, ' reply')
                     cur.execute(sql_reply_update, (reply_comment_likes, reply_comment_text, reply_comment_id))
@@ -147,6 +133,4 @@ for id in channel_id:
 
                 conn.commit()
 cur.close()
-# except:
-# 	bot_message = "InstaNegative0 Error " + "  " + str(datetime.datetime.now())
-# 	telegram_bot_sendtext(bot_message)
+
