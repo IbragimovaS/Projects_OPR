@@ -1,0 +1,127 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "",
+    "version": "1.0.0",
+    "title": "Send Files API"
+  },
+  "host": "esg.redcapcloud.com:5443",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "send_file",
+      "description": "Sending file to AS2 partner",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "https://github.com/nphaseinc/django-pyas2"
+      }
+    }
+  ],
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/api/send": {
+      "post": {
+        "tags": [
+          "send_file"
+        ],
+        "summary": "Send file to AS2 partner",
+        "description": "",
+        "operationId": "send_file",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "receiverId - partner AS2 name, senderId-Organization AS2 name,  content - base64 of the file,  filename - name of the file to send",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/message"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Auth is invalid"
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "securityDefinitions": {
+    "basicAuth": {
+      "type": "basic"
+    }
+  },
+  "definitions": {
+    "message": {
+      "type": "object",
+      "required": [
+        "receiverId",
+        "senderId",
+        "content",
+        "filename"
+      ],
+      "properties": {
+        "receiverId": {
+          "type": "string",
+          "example": "as2_receiver"
+        },
+        "senderId": {
+          "type": "string",
+          "example": "as2_sender"
+        },
+        "content": {
+          "type": "string",
+          "description": "base64 of the file"
+        },
+        "filename": {
+          "type": "string",
+          "description": "name of the file, with format"
+        }
+      },
+      "xml": {
+        "name": "message"
+      }
+    },
+    "ApiResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "type": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Find out more about AS2 file sender",
+    "url": "https://github.com/nphaseinc/django-pyas2"
+  }
+}
